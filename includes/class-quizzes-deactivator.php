@@ -30,6 +30,12 @@ class Quizzes_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
+		      global $wpdb;
+        $table_name = $wpdb->prefix . 'quizzes_meta';
+        $rating_table_name = $wpdb->prefix . 'rating_scale';
+
+        $wpdb->query("DROP TABLE IF EXISTS $table_name");
+        $wpdb->query("DROP TABLE IF EXISTS $rating_table_name");
 
 	}
 
