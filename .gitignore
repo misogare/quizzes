@@ -2,10 +2,3 @@
 
 
 .vs
-node_modules
-.babelrc
-jest.config.js
-jest.setup.js
-package.json
-package-lock.json
-test
