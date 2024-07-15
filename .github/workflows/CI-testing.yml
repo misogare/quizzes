@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.7
 
     - name: Set up PHP
       uses: shivammathur/setup-php@2.31.1
@@ -41,6 +41,9 @@ jobs:
     - name: Install dependencies
       run: composer install
 
+    - name: Make install-wp-tests.sh executable
+      run: chmod +x ./bin/install-wp-tests.sh
+
     - name: Install WordPress for testing
       env:
         DB_NAME: wordpress_test
@@ -51,44 +54,3 @@ jobs:
 
     - name: Run PHPUnit tests
       run: ./vendor/bin/phpunit
-
-  security_scan:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Run Security Scan
-      run: |
-        # Replace with your security scanning command
-        echo "Running security scan..."
-
-  auto_merge:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Merge Pull Requests
-      uses: actions/github-script@v4
-      with:
-        script: |
-          const { data: pullRequests } = await github.pulls.list({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            head: `${context.repo.owner}:${context.ref}`,
-            state: 'open',
-          });
-
-          const pullRequest = pullRequests[0];
-
-          if (pullRequest && pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
-            await github.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pullRequest.number,
-              merge_method: 'merge',
-            });
-          }
