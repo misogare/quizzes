@@ -48,21 +48,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.7
 
-      - name: Merge pull request
+      - name: Find and Merge Pull Request
         uses: actions/github-script@v4
         with:
           script: |
-            const { data: pullRequest } = await github.pulls.get({
+            const { data: pullRequests } = await github.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
+              head: `${context.repo.owner}:${context.ref}`,
+              state: 'open',
             });
 
-            if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
+            const pullRequest = pullRequests[0];
+
+            if (pullRequest && pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
               await github.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
+                pull_number: pullRequest.number,
                 merge_method: 'merge',
               });
             }
