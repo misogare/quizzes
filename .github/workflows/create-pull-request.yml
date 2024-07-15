@@ -1,4 +1,4 @@
-name: Security Scanning (Optional Auto-Merge)
+name: Security Scanning and Auto Merge
 
 on:
   push:
@@ -14,43 +14,28 @@ jobs:
         with:
           node-version: '18'
       - run: npm install
-      - run: npm audit  # Consider adding additional security scans here
-  create-pull-request:  # Optional Auto-Pull Request Creation
+      - run: npm audit
+
+  auto-merge:
     runs-on: ubuntu-latest
-    outputs:
-      pull_request_number: ${{ steps.create_pr.outputs.pull_request_number }}
+    if: github.ref == 'refs/heads/clean-code-arch' && success()
     steps:
       - uses: actions/checkout@v4.1.7
-      - uses: peter-evans/create-pull-request@v6.0.1
-        id: create_pr
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update from clean-code-arch
-          title: Update from clean-code-arch
-          body: Auto-generated pull request. (Optional Auto-Merge enabled)
-          branch: auto-pr/clean-code-arch
-          base: main
-  auto-merge:  # Optional Auto-Merge (Consider security implications)
-    runs-on: ubuntu-latest
-    needs: [create-pull-request]
-    steps:
-      - uses: actions/checkout@v4.1.7
-      - name: Merge pull request (Only on clean merges)
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/clean-code-arch'
+      - name: Merge pull request
         uses: actions/github-script@v4
         with:
           script: |
-            const { data: pullRequest } = await github.pulls.get({
+            const pullRequest = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: ${{ needs.create-pull-request.outputs.pull_request_number }},
+              pull_number: github.sha
             });
 
-            if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
+            if (pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
               await github.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: pullRequest.number,
-                merge_method: 'merge',
+                pull_number: github.sha,
+                merge_method: 'merge'
               });
             }
