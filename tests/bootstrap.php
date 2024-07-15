@@ -32,6 +32,7 @@ function _manually_load_plugin() {
 	    require_once 'F:\xampp\htdocs\testsite\wp-content\plugins\mailpoet\mailpoet.php'; // Replace with actual path
 
 	require dirname( dirname( __FILE__ ) ) . '/quizzes.php';
+	
 }
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );

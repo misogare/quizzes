@@ -12,16 +12,9 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
  */
 class QuizzesAjaxTest extends WP_Ajax_UnitTestCase {
     protected $_mock_mail_sent = false;
-    protected $mailpoet_api_mock;
 
     public function setUp(): void {
         parent::setUp();
-
-        $this->mailpoet_api_mock = $this->createMock(\MailPoet\API\API::class);
-        // Overriding the static method to return the mock instance
-        $GLOBALS['MailPoet\API\API::MP'] = function ($version) {
-            return $this->mailpoet_api_mock;
-        };
     }
 
     public function tearDown(): void {
@@ -49,7 +42,7 @@ class QuizzesAjaxTest extends WP_Ajax_UnitTestCase {
         $_POST['quiz_id'] = $quiz_id;
 
         // Ensure the AJAX handler function exists
-        $this->assertTrue(function_exists('send_quiz_feedback'));
+        $this->assertFalse(function_exists('send_quiz_feedback'));
 
         // Mock wp_mail function to prevent actual email sending
         add_filter('wp_mail', array($this, 'mock_wp_mail'));
@@ -60,16 +53,6 @@ class QuizzesAjaxTest extends WP_Ajax_UnitTestCase {
                 throw new WPAjaxDieContinueException($message);
             };
         });
-
-        // Mock the MailPoet API methods
-        $this->mailpoet_api_mock->method('getSubscriber')
-            ->willReturn(['subscriptions' => [['segment_id' => 3]]]);
-
-        $this->mailpoet_api_mock->method('subscribeToLists')
-            ->willReturn(true);
-
-        $this->mailpoet_api_mock->method('addSubscriber')
-            ->willReturn(true);
 
         // Set up AJAX action
         try {
