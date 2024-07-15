@@ -1,0 +1,29 @@
+name: CD Workflow
+
+on:
+  pull_request:
+    branches:
+      - clean-code-arch
+
+jobs:
+ deploy-to-development:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == 'clean-code-arch' && github.event.pull_request.head.ref == 'main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install rsync
+      run: sudo apt-get install -y rsync
+
+    - name: Copy files to development server
+      env:
+        DEVELOPMENT_IP: ${{ secrets.DEVELOPMENT_IP }}
+        DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
+        DEVELOPMENT_KEY: ${{ secrets.DEVELOPMENT_KEY }}
+      run: |
+        echo "${DEVELOPMENT_KEY}" > /tmp/development_key
+        chmod 600 /tmp/development_key
+        rsync -avz --delete -e "ssh -i /tmp/development_key -o StrictHostKeyChecking=no" . ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP}:/public_html/dev.healoneself/wp-content/plugins/quizzes
+        rm /tmp/development_key
