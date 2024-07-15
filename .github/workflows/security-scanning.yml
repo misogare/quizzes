@@ -1,0 +1,66 @@
+name: Security Scanning
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  js-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run npm audit
+        run: npm audit
+
+  php-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+      
+      - name: Install PHP and Composer
+        uses: ramsey/composer-install@2.3.1
+   
+      - name: Install dependencies
+        run: composer install
+      
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse
+      
+      - name: Run PHP Security Checker
+        run: composer require --dev enlightn/security-checker && ./vendor/bin/security-checker security:check
+
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: [js-security-scan, php-security-scan]
+    steps:
+      - name: Merge pull request
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { data: pullRequest } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+
+            if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
+              await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                merge_method: 'merge',
+              });
+            }
