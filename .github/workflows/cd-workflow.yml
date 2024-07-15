@@ -17,12 +17,13 @@ jobs:
     - name: Install rsync
       run: sudo apt-get install -y rsync
 
-    - name: SSH into server and list files
-      env:
-        DEVELOPMENT_IP: ${{ env.DEVELOPMENT_IP }}
-        DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
-        DEVELOPMENT_PASSWORD: ${{ secrets.DEVELOPMENT_PASSWORD }}
+    - name: Connect to server using SSH
+      uses: appleboy/ssh-action@v1.0.3  # Use the SSH action
+      with:
+          host: ${{ env.DEVELOPMENT_IP }}
+          username: ${{ secrets.DEVELOPMENT_USERNAME }}
+          key: ${{ secrets.DEVELOPMENT_PRIVATE_KEY }}  # Optional, if not using a key file
+          passphrase: ${{ secrets.DEVELOPMENT_PASSPHRASE }}
+    - name: Run commands on server
       run: |
-        eval "$(ssh-agent -s)"
-        echo "${{ secrets.DEVELOPMENT_PASSWORD }}" | ssh-add -
-        ssh StrictHostKeyChecking=no ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP} "ls -l /public_html/dev.healoneself/wp-content/plugins/quizzes"
+          ls -l  # Example command
