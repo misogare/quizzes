@@ -23,6 +23,6 @@ jobs:
         DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
         DEVELOPMENT_PASSWORD: ${{ secrets.DEVELOPMENT_PASSWORD }}
       run: |
-        echo "${{ secrets.DEVELOPMENT_PASSWORD }}" > /tmp/development_password
-        chmod 600 /tmp/development_password
-        sshpass -f /tmp/development_password ssh -o StrictHostKeyChecking=no ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP} "ls -l /public_html/dev.healoneself/wp-content/plugins/quizzes"
+        eval "$(ssh-agent -s)"
+        echo "${{ secrets.DEVELOPMENT_PASSWORD }}" | ssh-add -
+        ssh StrictHostKeyChecking=no ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP} "ls -l /public_html/dev.healoneself/wp-content/plugins/quizzes"
