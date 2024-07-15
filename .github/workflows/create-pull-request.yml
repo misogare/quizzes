@@ -57,7 +57,7 @@ jobs:
             const { data: pullRequest } = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: ${{ needs.create-pull-request.outputs.pull_request_number }},
+              pull_number: ${{ needs.create-pull-request.outputs.pull_request_number }}
             });
 
             if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
