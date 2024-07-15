@@ -1,0 +1,94 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - clean-code-arch
+  pull_request:
+    branches:
+      - main
+      - clean-code-arch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        extensions: mbstring, mysqli, json
+        tools: composer
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Install WordPress for testing
+      env:
+        DB_NAME: wordpress_test
+        DB_USER: root
+        DB_PASS: root
+        DB_HOST: 127.0.0.1
+      run: ./bin/install-wp-tests.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST
+
+    - name: Run PHPUnit tests
+      run: ./vendor/bin/phpunit
+
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Run Security Scan
+      run: |
+        # Replace with your security scanning command
+        echo "Running security scan..."
+
+  auto_merge:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Merge Pull Requests
+      uses: actions/github-script@v4
+      with:
+        script: |
+          const { data: pullRequests } = await github.pulls.list({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            head: `${context.repo.owner}:${context.ref}`,
+            state: 'open',
+          });
+
+          const pullRequest = pullRequests[0];
+
+          if (pullRequest && pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
+            await github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pullRequest.number,
+              merge_method: 'merge',
+            });
+          }
