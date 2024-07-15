@@ -17,13 +17,12 @@ jobs:
     - name: Install rsync
       run: sudo apt-get install -y rsync
 
-    - name: Copy files to development server
+    - name: SSH into server and list files
       env:
         DEVELOPMENT_IP: ${{ env.DEVELOPMENT_IP }}
         DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
         DEVELOPMENT_PASSWORD: ${{ secrets.DEVELOPMENT_PASSWORD }}
       run: |
-        echo "${DEVELOPMENT_PASSWORD}" > /tmp/development_password
-        chmod 600 /tmp/DEVELOPMENT_PASSWORD
-        rsync -avz --delete -e "ssh -i /tmp/DEVELOPMENT_PASSWORD -o StrictHostKeyChecking=no" . ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP}:/public_html/dev.healoneself/wp-content/plugins/quizzes
-        rm /tmp/DEVELOPMENT_PASSWORD
+        echo "${{ secrets.DEVELOPMENT_PASSWORD }}" > /tmp/development_password
+        chmod 600 /tmp/development_password
+        sshpass -f /tmp/development_password ssh -o StrictHostKeyChecking=no ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP} "ls -l /public_html/dev.healoneself/wp-content/plugins/quizzes"
