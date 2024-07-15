@@ -7,7 +7,7 @@ const {
     updateProgress,
     restoreAnswers,
     navigateToSavedState
-} = require('../js/quizz-action.js');
+} = require('../public/js/quizzes-public.js');
 
 describe('Quiz functions', () => {
     let dom;
