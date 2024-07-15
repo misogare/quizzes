@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Create Pull Request
+        id: create_pr
         uses: peter-evans/create-pull-request@v6.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -22,4 +23,13 @@ jobs:
           title: "Auto PR: Updates from clean-code-arch"
           body: "This pull request has been automatically created by GitHub Actions."
           draft: false
-          auto-merge: true
+      
+      - name: Enable Auto-Merge
+        if: success()
+        run: |
+          pr_number=$(jq --raw-output '.number' < $GITHUB_EVENT_PATH)
+          echo "Enabling auto-merge for PR #${pr_number}"
+          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${pr_number}/merge \
+            -d '{"commit_title":"Auto merge","merge_method":"squash"}'
