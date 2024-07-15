@@ -9,6 +9,7 @@ jobs:
  deploy-to-development:
     runs-on: ubuntu-latest
     if: github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'clean-code-arch'
+    environment: deployments  # Specify the environment
 
     steps:
     - name: Checkout code
