@@ -54,14 +54,14 @@ jobs:
             const { data: pullRequest } = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
+              pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
             });
 
             if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
               await github.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
+                pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
                 merge_method: 'merge',
               });
             }
