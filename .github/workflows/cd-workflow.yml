@@ -21,9 +21,9 @@ jobs:
       env:
         DEVELOPMENT_IP: ${{ secrets.DEVELOPMENT_IP }}
         DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
-        DEVELOPMENT_KEY: ${{ secrets.DEVELOPMENT_KEY }}
+        DEVELOPMENT_PASSWORD: ${{ secrets.DEVELOPMENT_PASSWORD }}
       run: |
-        echo "${DEVELOPMENT_KEY}" > /tmp/development_key
-        chmod 600 /tmp/development_key
-        rsync -avz --delete -e "ssh -i /tmp/development_key -o StrictHostKeyChecking=no" . ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP}:/public_html/dev.healoneself/wp-content/plugins/quizzes
-        rm /tmp/development_key
+        echo "${DEVELOPMENT_PASSWORD}" > /tmp/development_password
+        chmod 600 /tmp/DEVELOPMENT_PASSWORD
+        rsync -avz --delete -e "ssh -i /tmp/DEVELOPMENT_PASSWORD -o StrictHostKeyChecking=no" . ${DEVELOPMENT_USERNAME}@${DEVELOPMENT_IP}:/public_html/dev.healoneself/wp-content/plugins/quizzes
+        rm /tmp/DEVELOPMENT_PASSWORD
