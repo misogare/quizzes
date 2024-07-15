@@ -29,7 +29,6 @@ require_once "{$_tests_dir}/includes/functions.php";
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	    require_once 'F:\xampp\htdocs\testsite\wp-content\plugins\mailpoet\mailpoet.php'; // Replace with actual path
 
 	require dirname( dirname( __FILE__ ) ) . '/quizzes.php';
 	
