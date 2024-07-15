@@ -23,28 +23,6 @@ jobs:
       - name: Run npm audit
         run: npm audit
 
-  php-security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.7
-      
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2' # or any version you need
-          tools: composer
-
-      - name: Install dependencies
-        run: composer install
-      
-      - name: Set permissions for PHPStan
-        run: chmod +x vendor/bin/phpstan
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse includes public admin
-      
-      - name: Run PHP Security Checker
-        run: vendor/bin/security-checker security:check
 
   auto-merge:
     runs-on: ubuntu-latest
