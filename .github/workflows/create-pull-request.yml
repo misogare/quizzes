@@ -1,0 +1,68 @@
+name: Security Scanning and Auto Merge
+
+on:
+  push:
+    branches:
+      - clean-code-arch
+
+jobs:
+  js-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run npm audit
+        run: npm audit
+
+  create-pull-request:
+    runs-on: ubuntu-latest
+    needs: [js-security-scan]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Create Pull Request
+        id: create_pr
+        uses: peter-evans/create-pull-request@v6.0.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update from clean-code-arch
+          title: Update from clean-code-arch
+          body: Auto-generated pull request.
+          branch: auto-pr/clean-code-arch
+          base: main
+
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: [create-pull-request]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Merge pull request
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const { data: pullRequest } = await github.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
+            });
+
+            if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
+              await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: ${{ steps.create_pr.outputs.pull_request_number }},
+                merge_method: 'merge',
+              });
+            }
