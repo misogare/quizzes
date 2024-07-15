@@ -1,0 +1,25 @@
+name: Create Pull Request
+
+on:
+  push:
+    branches:
+      - clean-code-arch
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto PR: Updates from clean-code-arch"
+          branch: clean-code-arch
+          base: main
+          title: "Auto PR: Updates from clean-code-arch"
+          body: "This pull request has been automatically created by GitHub Actions."
+          draft: false
+          auto-merge: true
