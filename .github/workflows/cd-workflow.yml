@@ -8,7 +8,7 @@ on:
 jobs:
  deploy-to-development:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.ref == 'clean-code-arch' && github.event.pull_request.head.ref == 'clean-code-arch'
+    if: github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'clean-code-arch'
 
     steps:
     - name: Checkout code
