@@ -19,7 +19,7 @@ jobs:
 
     - name: Copy files to development server
       env:
-        DEVELOPMENT_IP: ${{ secrets.DEVELOPMENT_IP }}
+        DEVELOPMENT_IP: ${{ env.DEVELOPMENT_IP }}
         DEVELOPMENT_USERNAME: ${{ secrets.DEVELOPMENT_USERNAME }}
         DEVELOPMENT_PASSWORD: ${{ secrets.DEVELOPMENT_PASSWORD }}
       run: |
