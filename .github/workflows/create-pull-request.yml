@@ -1,4 +1,4 @@
-name: Security Scanning and Auto Merge
+name: Create and Auto-Merge Pull Request
 
 on:
   push:
@@ -6,56 +6,34 @@ on:
       - clean-code-arch
 
 jobs:
-  js-security-scan:
+  create-pull-request:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4.1.7
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v4.0.3
-        with:
-          node-version: '18'
-      
-      - name: Install dependencies
-        run: npm install
-      
-      - name: Run npm audit
-        run: npm audit
+        uses: actions/checkout@v4
 
-  create-pull-request:
-    runs-on: ubuntu-latest
-    needs: [js-security-scan]
-    steps:
+      - name: Install GitHub CLI
+        run: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+      - name: Add GitHub CLI repository
+        run: sudo apt-add-repository https://cli.github.com/packages
+      - name: Update package list
+        run: sudo apt update
+      - name: Install GitHub CLI
+        run: sudo apt install gh -y
+
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
+        id: create_pr
+        uses: peter-evans/create-pull-request@v6.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: Update from clean-code-arch
-          title: Update from clean-code-arch
-          body: Auto-generated pull request.
-          branch: auto-pr/clean-code-arch
+          commit-message: "Auto PR: Updates from clean-code-arch"
+          branch: clean-code-arch
           base: main
+          title: "Auto PR: Updates from clean-code-arch"
+          body: "This pull request has been automatically created by GitHub Actions."
+          draft: false
 
-  auto-merge:
-    runs-on: ubuntu-latest
-    needs: [create-pull-request]
-    steps:
-      - name: Merge pull request
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const { data: pullRequest } = await github.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-            });
-
-            if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
-              await github.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
-                merge_method: 'merge',
-              });
-            }
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --merge --auto "$(gh pr view --json number --jq '.number')"
+        env:
+          GH_TOKEN: ${{ secrets.PAT }}
