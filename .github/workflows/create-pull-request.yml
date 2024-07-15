@@ -38,7 +38,7 @@ jobs:
           commit-message: Update from clean-code-arch
           title: Update from clean-code-arch
           body: Auto-generated pull request.
-          branch: auto-pr/clean-code-arch
+          branch: origin/clean-code-arch
           base: main
 
   auto-merge:
