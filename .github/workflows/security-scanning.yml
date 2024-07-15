@@ -41,7 +41,7 @@ jobs:
       - name: Set permissions for PHPStan
         run: chmod +x vendor/bin/phpstan
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse
+        run: vendor/bin/phpstan analyse includes public admin
       
       - name: Run PHP Security Checker
         run: vendor/bin/security-checker security:check
