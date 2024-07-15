@@ -29,17 +29,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.7
       
-      - name: Install PHP and Composer
-        uses: ramsey/composer-install@2.3.1
-   
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1' # or any version you need
+          tools: composer
+
       - name: Install dependencies
         run: composer install
       
       - name: Run PHPStan
-        run: ./vendor/bin/phpstan analyse
+        run: vendor/bin/phpstan analyse
       
       - name: Run PHP Security Checker
-        run: composer require --dev enlightn/security-checker && ./vendor/bin/security-checker security:check
+        run: vendor/bin/security-checker security:check
 
   auto-merge:
     runs-on: ubuntu-latest
