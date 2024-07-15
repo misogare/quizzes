@@ -1,4 +1,4 @@
-name: Security Scanning and Auto Merge
+name: Security Scanning (Optional Auto-Merge)
 
 on:
   push:
@@ -9,47 +9,33 @@ jobs:
   js-security-scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.7
-      
-      - name: Set up Node.js
-        uses: actions/setup-node@v4.0.3
+      - uses: actions/checkout@v4.1.7
+      - uses: actions/setup-node@v4.0.3
         with:
           node-version: '18'
-      
-      - name: Install dependencies
-        run: npm install
-      
-      - name: Run npm audit
-        run: npm audit
-
-  create-pull-request:
+      - run: npm install
+      - run: npm audit  # Consider adding additional security scans here
+  create-pull-request:  # Optional Auto-Pull Request Creation
     runs-on: ubuntu-latest
     outputs:
       pull_request_number: ${{ steps.create_pr.outputs.pull_request_number }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.7
-
-      - name: Create Pull Request
+      - uses: actions/checkout@v4.1.7
+      - uses: peter-evans/create-pull-request@v6.0.1
         id: create_pr
-        uses: peter-evans/create-pull-request@v6.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update from clean-code-arch
           title: Update from clean-code-arch
-          body: Auto-generated pull request.
+          body: Auto-generated pull request. (Optional Auto-Merge enabled)
           branch: auto-pr/clean-code-arch
           base: main
-
-  auto-merge:
+  auto-merge:  # Optional Auto-Merge (Consider security implications)
     runs-on: ubuntu-latest
     needs: [create-pull-request]
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4.1.7
-
-      - name: Merge pull request
+      - uses: actions/checkout@v4.1.7
+      - name: Merge pull request (Only on clean merges)
         if: success() && github.event_name == 'push' && github.ref == 'refs/heads/clean-code-arch'
         uses: actions/github-script@v4
         with:
@@ -57,7 +43,7 @@ jobs:
             const { data: pullRequest } = await github.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: ${{ needs.create-pull-request.outputs.pull_request_number }}
+              pull_number: ${{ needs.create-pull-request.outputs.pull_request_number }},
             });
 
             if (pullRequest.state === 'open' && pullRequest.mergeable && pullRequest.mergeable_state === 'clean') {
