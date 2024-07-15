@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v4.1.7
 
       - name: Merge pull request
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/clean-code-arch'
         uses: actions/github-script@v4
         with:
           script: |
