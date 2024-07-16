@@ -25,5 +25,5 @@ jobs:
           username: ${{ secrets.DEVELOPMENT_USERNAME }}
           key: ${{ secrets.DEVELOPMENT_PRIVATE_KEY }}  # Optional, if not using a key file
           passphrase: ${{ secrets.DEVELOPMENT_PASSPHRASE }}
-          script: ls -l /public_html/dev.healoneself/wp-content/plugins/quizzes 
+          script: ls -l ~/public_html/dev.healoneself/wp-content/plugins/quizzes
  
