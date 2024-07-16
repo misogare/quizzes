@@ -24,7 +24,7 @@ jobs:
         FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
       run: |
-        lftp -c "set ftp:ssl-allow no; open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER; mirror -R ./ wp-content/plugins/quizzes/tests"
+        lftp -c "set ftp:ssl-allow no; open -u $FTP_USERNAME,$FTP_PASSWORD $FTP_SERVER; mirror -R --parallel=5 ./ wp-content/plugins/quizzes/tests"
 
 #    - name: Connect to server using SSH
 #      uses: appleboy/ssh-action@v1.0.3  # Use the SSH action
