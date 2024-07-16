@@ -354,7 +354,6 @@ function send_quiz_feedback() {
     $mail_result = wp_mail($user_email, $subject, $message);
     remove_filter('wp_mail_content_type', 'set_html_content_type');
     error_log('Email sent result: ' . ($mail_result ? 'Success' : 'Failure'));
-     wp_send_json_success('Feedback sent successfully.');
  if (class_exists(\MailPoet\API\API::class)) {
     $mailpoet_api = \MailPoet\API\API::MP('v1');
     $list_id = (3); // The ID of the list to add subscribers to
@@ -409,7 +408,7 @@ function send_quiz_feedback() {
   if (defined('DOING_AJAX') && DOING_AJAX && defined('DOING_UNIT_TESTS') && DOING_UNIT_TESTS) {
         return;
     }
-
+    wp_send_json_success('Feedback sent successfully.');
     wp_die(); // Always end AJAX handler functions with wp_die()
 }
 
