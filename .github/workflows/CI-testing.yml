@@ -1,0 +1,59 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+      - clean-code-arch
+  pull_request:
+    branches:
+      - main
+      - clean-code-arch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping --silent"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.1.7
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@2.31.1
+      with:
+        php-version: '8.2'
+        extensions: mbstring, mysqli, json
+        tools: composer
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Make install-wp-tests.sh executable
+      run: chmod +x ./bin/install-wp-tests.sh
+
+    - name: Install WordPress for testing
+      env:
+        DB_NAME: wordpress_test
+        DB_USER: root
+        DB_PASS: root
+        DB_HOST: 127.0.0.1
+      run: ./bin/install-wp-tests.sh $DB_NAME $DB_USER $DB_PASS $DB_HOST latest false -y
+
+    - name: Make install-wp-tests.sh executable
+      run: chmod +x ./vendor/bin/phpunit
+
+    - name: Run PHPUnit tests
+      run: ./vendor/bin/phpunit

@@ -1,0 +1,33 @@
+name: CD Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+ deploy-to-development:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'clean-code-arch'
+    environment: development # Specify the environment
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install rsync
+      run: sudo apt-get install -y rsync
+
+    - name: Print DEVELOPMENT_IP
+      run: echo ${{ env.DEVELOPMENT_IP }}
+
+    - name: Connect to server using SSH
+      uses: appleboy/ssh-action@v1.0.3  # Use the SSH action
+      with:
+          host: ${{ secrets.DEVELOPMENT_IP }}
+          username: ${{ secrets.DEVELOPMENT_USERNAME }}
+          key: ${{ secrets.DEVELOPMENT_PRIVATE_KEY }}  # Optional, if not using a key file
+          passphrase: ${{ secrets.DEVELOPMENT_PASSPHRASE }}
+    - name: Run commands on server
+      run: |
+          ls -l  # Example command
